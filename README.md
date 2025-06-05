@@ -40,3 +40,7 @@ ES256 is a digital signature algorithm that combines:
 - SHA-256 hashing
 
 It provides a good balance between security and performance, making it suitable for JWT signing in modern web applications.
+
+## License
+
+MIT
