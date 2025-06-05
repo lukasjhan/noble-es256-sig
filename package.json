@@ -1,5 +1,5 @@
 {
-  "name": "noble-curve-test",
+  "name": "noble-es256-sig-test",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
