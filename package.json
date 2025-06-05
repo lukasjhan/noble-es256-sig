@@ -1,0 +1,24 @@
+{
+  "name": "noble-curve-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "tsx test.ts",
+    "verify": "tsx verify.ts",
+    "a": "tsx a.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@noble/curves": "^1.9.1",
+    "@noble/hashes": "^1.8.0",
+    "@sd-jwt/utils": "^0.10.0",
+    "@types/jsonwebtoken": "^9.0.9",
+    "jose": "^6.0.11",
+    "jsonwebtoken": "^9.0.2",
+    "tsx": "^4.19.4",
+    "uint8arrays": "^5.1.0"
+  }
+}
