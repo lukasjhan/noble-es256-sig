@@ -23,6 +23,9 @@ importers:
       jose:
         specifier: ^6.0.11
         version: 6.0.11
+      js-base64:
+        specifier: ^3.7.7
+        version: 3.7.7
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2

@@ -1,6 +1,6 @@
 import { p256 } from "@noble/curves/p256";
-import { jwtVerify, SignJWT } from "jose";
-import { sha256 } from "./a";
+import { jwtVerify } from "jose";
+import { sha256 } from "./hash";
 
 // --- Helper Functions (uint8arrays 대체) ---
 
