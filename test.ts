@@ -1,5 +1,5 @@
 import { p256 } from "@noble/curves/p256";
-import { SignJWT } from "jose";
+import { jwtVerify, SignJWT } from "jose";
 import { sha256 } from "./a";
 
 // --- Helper Functions (uint8arrays 대체) ---
@@ -68,6 +68,14 @@ const jwk = {
   alg: "ES256",
 };
 
+const pubJwk = {
+  kty: "EC",
+  crv: "P-256",
+  x: "ifSgGMkEIEDPsxFxdOjeJxhYsz0STsTT5bni_MXNEJs",
+  y: "viFDEvB61K6zuj2iq23j0FCmVYYQ8tGJ_3f35XXUDZ0",
+  alg: "ES256",
+};
+
 // 2. JWT 헤더 및 페이로드 정의
 const header = {
   alg: "ES256",
@@ -78,8 +86,6 @@ const payload = {
   iss: "https://gemini.google.com",
   sub: "user-12345",
   name: "Gemini AI",
-  iat: Math.floor(Date.now() / 1000),
-  exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1시간 후 만료
 };
 
 // 3. JWT 생성 및 서명 함수
@@ -115,11 +121,6 @@ async function signJwt(
   console.log("생성된 JWT:");
   console.log(jwt);
 
-  const realJwt = await new SignJWT(payload)
-    .setProtectedHeader({ alg: "ES256", typ: "JWT" })
-    .setIssuedAt()
-    .setExpirationTime("1h")
-    .sign(jwk);
-  console.log("진짜 생성된 JWT:");
-  console.log(realJwt);
+  const result = await jwtVerify(jwt, pubJwk, { algorithms: ["ES256"] });
+  console.log(result);
 })();
