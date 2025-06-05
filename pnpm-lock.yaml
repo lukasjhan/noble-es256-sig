@@ -14,6 +14,9 @@ importers:
       '@noble/hashes':
         specifier: ^1.8.0
         version: 1.8.0
+      '@sd-jwt/hash':
+        specifier: ^0.10.0
+        version: 0.10.0
       '@sd-jwt/utils':
         specifier: ^0.10.0
         version: 0.10.0
@@ -192,9 +195,16 @@ packages:
     resolution: {integrity: sha512-k11yZxZg+t+gWvBbIswW0yoJlu8cHOC7dhunwOzoWH/mXGBiYyR4YY6hAEK/3EUs4UpB8la1RfdRpeGsFHkWsA==}
     engines: {node: ^14.21.3 || >=16}
 
+  '@noble/hashes@1.0.0':
+    resolution: {integrity: sha512-DZVbtY62kc3kkBtMHqwCOfXrT/hnoORy5BJ4+HU1IR59X0KWAOqsfzQPcUl/lQLlG7qXbe/fZ3r/emxtAl+sqg==}
+
   '@noble/hashes@1.8.0':
     resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
     engines: {node: ^14.21.3 || >=16}
+
+  '@sd-jwt/hash@0.10.0':
+    resolution: {integrity: sha512-IAqPAEr1bCoGCqIYYIjaBH6MqFxsJIpSufmOxHIy31I/TtM+xJJHJjK3JPDAa72KewZcy4pcXAg8nK5ggI764w==}
+    engines: {node: '>=18'}
 
   '@sd-jwt/types@0.10.0':
     resolution: {integrity: sha512-/UOSel/n16qi5xt/hiX3ob4y/ke+yLn+iuVZDfYUvxKTOs/g0VXRo2/RQ5Fp5Coa8SxSms0uW9kb5pv2YdY8yw==}
@@ -378,7 +388,14 @@ snapshots:
     dependencies:
       '@noble/hashes': 1.8.0
 
+  '@noble/hashes@1.0.0': {}
+
   '@noble/hashes@1.8.0': {}
+
+  '@sd-jwt/hash@0.10.0':
+    dependencies:
+      '@noble/hashes': 1.0.0
+      '@sd-jwt/utils': 0.10.0
 
   '@sd-jwt/types@0.10.0': {}
 

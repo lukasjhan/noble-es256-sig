@@ -1,31 +1,11 @@
 import { p256 } from "@noble/curves/p256";
 import { jwtVerify } from "jose";
-import { sha256 } from "./hash";
-
-// --- Helper Functions (uint8arrays 대체) ---
-
-/**
- * Uint8Array를 Base64URL 문자열로 인코딩합니다.
- * @param bytes 인코딩할 Uint8Array
- * @returns Base64URL 문자열
- */
-function bytesToBase64Url(bytes: Uint8Array): string {
-  // 1. Uint8Array를 바이너리 문자열로 변환합니다.
-  let binary = "";
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-
-  // 2. btoa를 사용하여 Base64로 인코딩합니다.
-  const base64 = btoa(binary);
-
-  // 3. Base64를 URL-safe 형식으로 변환합니다.
-  return base64
-    .replace(/\+/g, "-") // '+' -> '-'
-    .replace(/\//g, "_") // '/' -> '_'
-    .replace(/=/g, ""); // padding 제거
-}
+import { sha256 } from "@sd-jwt/hash";
+import {
+  base64urlDecode,
+  base64urlEncode,
+  uint8ArrayToBase64Url,
+} from "@sd-jwt/utils";
 
 /**
  * JSON 객체를 Base64URL 문자열로 인코딩합니다.
@@ -34,8 +14,7 @@ function bytesToBase64Url(bytes: Uint8Array): string {
  */
 function objectToBase64Url(data: object): string {
   const jsonString = JSON.stringify(data);
-  const bytes = new TextEncoder().encode(jsonString);
-  return bytesToBase64Url(bytes);
+  return base64urlEncode(jsonString);
 }
 function fromBase64Url(base64Url: string) {
   let base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -110,7 +89,7 @@ async function signJwt(
   const compactSignatureBytes = signature.toCompactRawBytes();
 
   // 서명을 Base64URL로 인코딩합니다.
-  const encodedSignature = bytesToBase64Url(compactSignatureBytes);
+  const encodedSignature = uint8ArrayToBase64Url(compactSignatureBytes);
 
   // 최종 JWT를 반환합니다.
   return `${signingInput}.${encodedSignature}`;
