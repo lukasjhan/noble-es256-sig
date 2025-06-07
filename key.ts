@@ -122,12 +122,20 @@ export function publicKeyJwkToUint8Array(
   jwk: EcPublicJwk,
   compressed = false
 ): Uint8Array {
-  const x = Base64.toUint8Array(jwk.x);
-  const y = Base64.toUint8Array(jwk.y);
+  const xBytes = Base64.toUint8Array(jwk.x);
+  const yBytes = Base64.toUint8Array(jwk.y);
 
-  const point = new p256.Point(bytesToBigInt(x), bytesToBigInt(y), 1n);
-  point.assertValidity(); // 유효한 P-256 곡선 위의 점인지 확인
+  // 1. 표준 비압축 형식(65바이트)의 공개키를 재구성합니다.
+  const uncompressedPublicKey = new Uint8Array(65);
+  uncompressedPublicKey[0] = 4; // 비압축 접두사 0x04
+  uncompressedPublicKey.set(xBytes, 1);
+  uncompressedPublicKey.set(yBytes, 33);
 
+  // 2. 라이브러리의 파서를 사용하여 Point 객체를 생성합니다.
+  // 이 방법은 내부 생성자 변경에 영향을 받지 않아 더 안정적입니다.
+  const point = p256.Point.fromHex(bytesToHex(uncompressedPublicKey));
+
+  // 3. Point를 원하는 형식의 바이트 배열로 변환합니다.
   return point.toRawBytes(compressed);
 }
 
