@@ -3,6 +3,7 @@ import { jwtVerify } from "jose";
 import { sha256 } from "@sd-jwt/hash";
 import { base64urlEncode, uint8ArrayToBase64Url } from "@sd-jwt/utils";
 import { Base64 } from "js-base64";
+import { bytesToHex } from "@noble/curves/abstract/utils";
 
 /**
  * Encodes a JSON object to a Base64URL string.
@@ -69,6 +70,33 @@ async function signJwt(
   return `${signingInput}.${encodedSignature}`;
 }
 
+const publicKeyJwkToUint8Array = (
+  jwk: { x: string; y: string },
+  compressed = false
+): Uint8Array => {
+  const xBytes = Base64.toUint8Array(jwk.x);
+  const yBytes = Base64.toUint8Array(jwk.y);
+
+  const uncompressedPublicKey = new Uint8Array(65);
+  uncompressedPublicKey[0] = 4; // uncompressed public key prefix: 0x04
+  uncompressedPublicKey.set(xBytes, 1);
+  uncompressedPublicKey.set(yBytes, 33);
+
+  const point = p256.Point.fromHex(bytesToHex(uncompressedPublicKey));
+  return point.toRawBytes(compressed);
+};
+
+const verifyJwt = (jwt: string, publicKey: { x: string; y: string }) => {
+  const [encodedHeader, encodedPayload, encodedSignature] = jwt.split(".");
+  const msgHash = sha256(`${encodedHeader}.${encodedPayload}`);
+  const signature = fromBase64Url(encodedSignature);
+  const publicKeyBytes = publicKeyJwkToUint8Array({
+    x: publicKey.x,
+    y: publicKey.y,
+  });
+  return p256.verify(signature, msgHash, publicKeyBytes);
+};
+
 (async () => {
   const jwt = await signJwt(jwk.d, header, payload);
   console.log("Generated JWT:");
@@ -76,4 +104,7 @@ async function signJwt(
 
   const result = await jwtVerify(jwt, pubJwk, { algorithms: ["ES256"] });
   console.log(result);
+
+  const verifyResult = verifyJwt(jwt, pubJwk);
+  console.log("Verify result:", verifyResult);
 })();
