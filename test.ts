@@ -5,9 +5,9 @@ import { base64urlEncode, uint8ArrayToBase64Url } from "@sd-jwt/utils";
 import { Base64 } from "js-base64";
 
 /**
- * JSON 객체를 Base64URL 문자열로 인코딩합니다.
- * @param data 인코딩할 JSON 객체
- * @returns Base64URL 문자열
+ * Encodes a JSON object to a Base64URL string.
+ * @param data JSON object to encode
+ * @returns Base64URL string
  */
 function objectToBase64Url(data: object): string {
   const jsonString = JSON.stringify(data);
@@ -67,7 +67,7 @@ async function signJwt(
 
 (async () => {
   const jwt = await signJwt(jwk.d, header, payload);
-  console.log("생성된 JWT:");
+  console.log("Generated JWT:");
   console.log(jwt);
 
   const result = await jwtVerify(jwt, pubJwk, { algorithms: ["ES256"] });
