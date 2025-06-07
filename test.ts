@@ -55,6 +55,10 @@ async function signJwt(
   const encodedPayload = objectToBase64Url(payload);
   const pkey = fromBase64Url(privateKeyJwkD);
 
+  const isP = p256.utils.isValidPrivateKey(pkey);
+  const publicKey = p256.getPublicKey(pkey, false);
+  console.log({ isP, publicKey });
+
   const signingInput = `${encodedHeader}.${encodedPayload}`;
   const signingInputBytes = sha256(signingInput);
 
