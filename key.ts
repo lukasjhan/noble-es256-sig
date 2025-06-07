@@ -3,7 +3,7 @@ import { bytesToHex, numberToBytesBE } from "@noble/curves/abstract/utils";
 import { uint8ArrayToBase64Url } from "@sd-jwt/utils";
 import { Base64 } from "js-base64";
 
-// 1. JWK 타입 정의
+// 1. JWK Type Definition
 export interface EcPublicJwk {
   kty: "EC";
   crv: "P-256";
@@ -16,9 +16,9 @@ export interface EcPrivateJwk extends EcPublicJwk {
   d: string; // Base64URL
 }
 
-// 2. 헬퍼 함수
+// 2. Helper Functions
 /**
- * BigInt를 32바이트 Uint8Array로 변환 (좌측 패딩)
+ * Convert BigInt to 32-byte Uint8Array (left padding)
  */
 function bigIntTo32Bytes(num: bigint): Uint8Array {
   const bytes = numberToBytesBE(num, 32);
@@ -31,16 +31,16 @@ function bigIntTo32Bytes(num: bigint): Uint8Array {
 }
 
 /**
- * Uint8Array를 BigInt로 변환
+ * Convert Uint8Array to BigInt
  */
 function bytesToBigInt(bytes: Uint8Array): bigint {
   return BigInt(`0x${bytesToHex(bytes)}`);
 }
 
-// 3. 개인키 변환 함수
+// 3. Private Key Conversion Functions
 /**
- * P-256 개인키(Uint8Array)를 EcPrivateJwk로 변환합니다.
- * @param privateKeyBytes 32바이트 개인키
+ * Convert P-256 private key (Uint8Array) to EcPrivateJwk.
+ * @param privateKeyBytes 32-byte private key
  * @returns EcPrivateJwk
  */
 export function privateKeyUint8ArrayToJwk(
@@ -50,7 +50,7 @@ export function privateKeyUint8ArrayToJwk(
     throw new Error("Invalid private key length. Must be 32 bytes.");
   }
 
-  // 공개키를 파생시킵니다 (비압축 형식).
+  // Derive the public key (uncompressed format).
   const publicKeyBytes = p256.getPublicKey(privateKeyBytes, false);
 
   const d = uint8ArrayToBase64Url(privateKeyBytes);
@@ -67,9 +67,9 @@ export function privateKeyUint8ArrayToJwk(
 }
 
 /**
- * EcPrivateJwk를 P-256 개인키(Uint8Array)로 변환합니다.
- * @param jwk EcPrivateJwk 객체
- * @returns 32바이트 개인키 Uint8Array
+ * Convert EcPrivateJwk to P-256 private key (Uint8Array).
+ * @param jwk EcPrivateJwk object
+ * @returns 32-byte private key Uint8Array
  */
 export function privateKeyJwkToUint8Array(jwk: EcPrivateJwk): Uint8Array {
   if (!jwk.d) {
@@ -82,11 +82,11 @@ export function privateKeyJwkToUint8Array(jwk: EcPrivateJwk): Uint8Array {
   return privateKeyBytes;
 }
 
-// 4. 공개키 변환 함수
+// 4. Public Key Conversion Functions
 /**
- * P-256 공개키(Uint8Array)를 EcPublicJwk로 변환합니다.
- * 압축(33바이트) 및 비압축(65바이트) 형식을 모두 지원합니다.
- * @param publicKeyBytes 공개키
+ * Convert P-256 public key (Uint8Array) to EcPublicJwk.
+ * Supports both compressed (33 bytes) and uncompressed (65 bytes) formats.
+ * @param publicKeyBytes public key
  * @returns EcPublicJwk
  */
 export function publicKeyUint8ArrayToJwk(
@@ -98,7 +98,7 @@ export function publicKeyUint8ArrayToJwk(
     );
   }
 
-  // fromHex는 압축/비압축을 자동 감지합니다.
+  // fromHex automatically detects compressed/uncompressed format.
   const point = p256.Point.fromHex(bytesToHex(publicKeyBytes));
 
   const x = uint8ArrayToBase64Url(bigIntTo32Bytes(point.x));
@@ -113,10 +113,10 @@ export function publicKeyUint8ArrayToJwk(
 }
 
 /**
- * EcPublicJwk를 P-256 공개키(Uint8Array)로 변환합니다.
- * @param jwk EcPublicJwk 객체
- * @param compressed 출력 형식을 압축(true)할지 여부 (기본값: false)
- * @returns 공개키 Uint8Array
+ * Convert EcPublicJwk to P-256 public key (Uint8Array).
+ * @param jwk EcPublicJwk object
+ * @param compressed whether to compress the output format (true) (default: false)
+ * @returns public key Uint8Array
  */
 export function publicKeyJwkToUint8Array(
   jwk: EcPublicJwk,
@@ -125,74 +125,74 @@ export function publicKeyJwkToUint8Array(
   const xBytes = Base64.toUint8Array(jwk.x);
   const yBytes = Base64.toUint8Array(jwk.y);
 
-  // 1. 표준 비압축 형식(65바이트)의 공개키를 재구성합니다.
+  // 1. Reconstruct the public key in standard uncompressed format (65 bytes).
   const uncompressedPublicKey = new Uint8Array(65);
-  uncompressedPublicKey[0] = 4; // 비압축 접두사 0x04
+  uncompressedPublicKey[0] = 4; // Uncompressed prefix 0x04
   uncompressedPublicKey.set(xBytes, 1);
   uncompressedPublicKey.set(yBytes, 33);
 
-  // 2. 라이브러리의 파서를 사용하여 Point 객체를 생성합니다.
-  // 이 방법은 내부 생성자 변경에 영향을 받지 않아 더 안정적입니다.
+  // 2. Use the library's parser to create a Point object.
+  // This method is more stable as it's not affected by internal constructor changes.
   const point = p256.Point.fromHex(bytesToHex(uncompressedPublicKey));
 
-  // 3. Point를 원하는 형식의 바이트 배열로 변환합니다.
+  // 3. Convert Point to byte array in the desired format.
   return point.toRawBytes(compressed);
 }
 
-// 5. 데모 함수
+// 5. Demo Function
 async function demo() {
-  console.log("--- 개인키 변환 데모 ---");
+  console.log("--- Private Key Conversion Demo ---");
   const originalPrivateKey = p256.utils.randomPrivateKey();
-  console.log("원본 개인키 (Uint8Array):", originalPrivateKey);
+  console.log("Original Private Key (Uint8Array):", originalPrivateKey);
 
   // Uint8Array -> Private JWK
   const privateJwk = privateKeyUint8ArrayToJwk(originalPrivateKey);
-  console.log("-> 변환된 Private JWK:", privateJwk);
+  console.log("-> Converted Private JWK:", privateJwk);
 
   // Private JWK -> Uint8Array
   const restoredPrivateKey = privateKeyJwkToUint8Array(privateJwk);
-  console.log("-> 복원된 개인키 (Uint8Array):", restoredPrivateKey);
+  console.log("-> Restored Private Key (Uint8Array):", restoredPrivateKey);
 
-  // 검증
+  // validation
   console.log(
-    "개인키 복원 성공:",
+    "Private Key Restoration Success:",
     bytesToHex(originalPrivateKey) === bytesToHex(restoredPrivateKey)
   );
 
-  console.log("\n--- 공개키 변환 데모 ---");
-  // 비압축 공개키로 테스트
+  console.log("\n--- Public Key Conversion Demo ---");
+  // uncompressed public key
   const originalUncompressedPublicKey = p256.getPublicKey(
     originalPrivateKey,
     false
   );
   console.log(
-    "원본 비압축 공개키 (Uint8Array):",
+    "Original Uncompressed Public Key (Uint8Array):",
     originalUncompressedPublicKey
   );
 
   // Uint8Array -> Public JWK
   const publicJwk = publicKeyUint8ArrayToJwk(originalUncompressedPublicKey);
-  console.log("-> 변환된 Public JWK:", publicJwk);
+  console.log("-> Converted Public JWK:", publicJwk);
 
-  // Public JWK -> Uint8Array (비압축)
+  // Public JWK -> Uint8Array (uncompressed)
   const restoredUncompressedPublicKey = publicKeyJwkToUint8Array(
     publicJwk,
     false
   );
   console.log(
-    "-> 복원된 비압축 공개키 (Uint8Array):",
+    "-> Restored Uncompressed Public Key (Uint8Array):",
     restoredUncompressedPublicKey
   );
   console.log(
-    "비압축 공개키 복원 성공:",
+    "Uncompressed Public Key Restoration Success:",
     bytesToHex(originalUncompressedPublicKey) ===
       bytesToHex(restoredUncompressedPublicKey)
   );
 
-  // Public JWK -> Uint8Array (압축)
+  // Public JWK -> Uint8Array (compressed)
   const restoredCompressedPublicKey = publicKeyJwkToUint8Array(publicJwk, true);
   console.log(
-    "-> 복원된 압축 공개키 (Uint8Array):",
+    "-> Restored Compressed Public Key (Uint8Array):",
     restoredCompressedPublicKey
   );
   const originalCompressedPublicKey = p256.getPublicKey(
@@ -200,11 +200,11 @@ async function demo() {
     true
   );
   console.log(
-    "압축 공개키 복원 성공:",
+    "Compressed Public Key Restoration Success:",
     bytesToHex(originalCompressedPublicKey) ===
       bytesToHex(restoredCompressedPublicKey)
   );
 }
 
-// 데모 실행
+// Run demo
 demo();
